@@ -167,6 +167,9 @@ def mux(video, wav, out):
 
 
 def run(render_frame, dur, name, audio_fn, argv):
+    _here = _os.path.dirname(_os.path.abspath(__file__))
+    _os.makedirs(_os.path.join(_here, 'preview'), exist_ok=True)
+    _os.makedirs(_os.path.join(_here, 'out'), exist_ok=True)
     """Preview mode: `--preview 0,3.5,9` writes PNGs. Otherwise full render + sound."""
     here = os.path.dirname(os.path.abspath(__file__))
     if len(argv) > 2 and argv[1] == '--preview':
