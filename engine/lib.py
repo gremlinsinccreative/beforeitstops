@@ -6,7 +6,8 @@ from scipy.io import wavfile
 
 W, H, FPS = 1080, 1920, 30
 SR = 44100
-FD = '/usr/share/fonts/opentype/inter/'
+import os as _os
+FD = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', 'fonts') + '/'
 BLACK, XB, BOLD, SEMI, MED = ('InterDisplay-Black', 'InterDisplay-ExtraBold',
                               'InterDisplay-Bold', 'Inter-SemiBold', 'Inter-Medium')
 BG = (10, 12, 18)
