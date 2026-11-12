@@ -189,3 +189,24 @@ def run(render_frame, dur, name, audio_fn, argv):
     au.write(wav)
     mux(silent, wav, os.path.join(here, 'out', f'{name}.mp4'))
     print('done', name, n, 'frames')
+
+
+def loop_sim(img, sim, t, dur, t_out=13.05, t_in=13.45):
+    """Composite sim(tt) -> RGBA layer so the last frame equals the first: the current cycle
+    fades out from t_out, the next cycle (tt = t - dur) fades in from t_in."""
+    if t < t_out + 0.45:
+        comp(img, sim(t), 1 - ease_io(ramp(t, t_out, t_out + 0.4)))
+    if t >= t_in:
+        comp(img, sim(t - dur), ease_io(ramp(t, t_in, t_in + 0.4)))
+
+
+def loop_text(img, hook, reveal, t, t_rev):
+    """Hook until the reveal, reveal until the reset, hook back for the loop."""
+    rin = ease_io(ramp(t, t_rev, t_rev + 0.35))
+    comp(img, hook, (1 - rin) if t < 13 else ease_io(ramp(t, 13.5, 13.9)))
+    comp(img, reveal, rin * (1 - ease_io(ramp(t, 13.1, 13.45))))
+
+
+def layer():
+    lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    return lay, ImageDraw.Draw(lay)
