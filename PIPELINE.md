@@ -25,3 +25,6 @@ Providers tiktok, instagram, youtube. media = the raw URL above. videoCoverMilli
 
 ## Cadence
 One a day at 18:00 Brussels through 17 Nov 2026; two a day (10:00 and 18:00) from 18 Nov 2026. Re-check hours with getBestTimeToPostByNetwork and the account's own numbers; change slots only when the account's data supports it, and say so in the report.
+
+## Open incidents
+- Fact 004 (seconds), 13 Nov 2026: published on Instagram and YouTube. TikTok removed it for "violating community guidelines" with no guideline named. The owner appealed on 13 Nov; answer pending. Row 4 stays Posted (2 of 3 platforms); leave its TikTok cell blank unless the appeal restores the video. Do not re-upload it to TikTok. If a second video is removed by TikTok, say so at the top of the report and notify the owner; do not change the queue without the owner's decision.
