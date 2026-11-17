@@ -49,10 +49,12 @@ HEADER_SHADE = Image.fromarray(_hs, 'RGBA')
 
 
 class Brand:
-    def __init__(self, num, q_lines, chips, answer_lines, twist_lines, t_stop, t_twist, dur=10.5):
+    def __init__(self, num, q_lines, chips, answer_lines, twist_lines, t_stop, t_twist, dur=10.5,
+                 sub='Guess before it stops.', cta=None, q_size=96):
         self.num, self.chips, self.t_stop, self.t_twist, self.dur = num, chips, t_stop, t_twist, dur
-        self.hook, _ = big_text([(f'FACT {num:03d}', SEMI, 30, MUTED)] + [(s, XB, 96, WHITE) for s in q_lines]
-                                + [('Guess before it stops.', SEMI, 42, GOLD)], 250)
+        self.cta = cta
+        self.hook, _ = big_text([(f'FACT {num:03d}', SEMI, 30, MUTED)] + [(s, XB, q_size, WHITE) for s in q_lines]
+                                + [(sub, SEMI, 42, GOLD)], 250)
         self.q_small = ' '.join(q_lines)
         self.answer, _ = big_text(answer_lines, 150)
         self.twist_lines = twist_lines
@@ -92,6 +94,8 @@ class Brand:
             d.rounded_rectangle([130, y, 950, y + 220], radius=36, fill=(8, 8, 18, 248), outline=GOLD + (255,), width=3)
             tw, _ = big_text(self.twist_lines, int(y + 34), shadow=False)
             lay.alpha_composite(tw)
+            if self.cta:
+                ImageDraw.Draw(lay).text((W / 2, y + 262), self.cta, font=font(BOLD, 40), fill=GOLD, anchor='mm')
             comp(img, lay, b)
         if self.t_stop <= t < self.t_stop + 0.35:
             k = (1 - (t - self.t_stop) / 0.35) ** 2
@@ -226,6 +230,20 @@ class SMusic:
         l = (np.sin(ph) + 0.4 * np.sin(2 * ph) + 0.2 * np.sin(3.01 * ph)) * vol * env
         r = (np.sin(ph * 1.004) + 0.4 * np.sin(2.01 * ph) + 0.2 * np.sin(2.99 * ph)) * vol * env
         self.add_st(t0, l.astype(np.float32), r.astype(np.float32))
+
+    def click_train(self, t0, t1, rate_fn, vol=0.2, tone=1800.0, pan=0.0):
+        """Ticks whose rate follows rate_fn(t). Above ~20/s they fuse into a buzz whose pitch IS the rate:
+        the number you watch rising becomes a note you hear rising."""
+        n = int(SR * (t1 - t0))
+        x = np.arange(n) / SR
+        r = np.array([rate_fn(t0 + v) for v in x[::147]]).repeat(147)[:n]
+        ph = np.cumsum(r) / SR
+        since = (ph - np.floor(ph)) / np.maximum(r, 1e-3)          # seconds since the last tick
+        click = np.exp(-since / 0.0025) * np.sin(2 * np.pi * tone * since)
+        body = np.exp(-since / 0.012) * np.sin(2 * np.pi * 2 * np.pi * 0 + 2 * np.pi * (tone / 4) * since)
+        w = (click + 0.5 * body) * vol
+        env = np.clip(x / 0.02, 0, 1) * np.clip((t1 - t0 - x) / 0.01, 0, 1)
+        self.add(t0, (w * env).astype(np.float32), pan)
 
     def silence(self, t0, t1):
         if not hasattr(self, 'sil'):
