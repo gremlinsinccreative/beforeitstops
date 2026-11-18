@@ -14,7 +14,7 @@ BR = Brand2(19, ['Quake 9 vs quake 6:', 'how much more energy?'], 'Quake 9 vs 6:
             [('A', '1,000×'), ('B', '32,000×'), ('C', '1,000,000×')],
             [('About 32,000×', BLACK, 120, GOLD), ('more energy  ·  Source: USGS', BOLD, 44, WHITE)],
             [('The shaking? Only', BOLD, 48, WHITE), ('1,000× bigger', BLACK, 96, GOLD)], T_STOP, T_TWIST, DUR,
-            sub='Guess A, B or C · wait for the 9', cta='Comment your letter', q_size=84)
+            sub='Wait for the 9', cta='Comment your letter', q_size=84)
 RESULT = {'A': 'out', 'B': 'win', 'C': 'out'}
 
 

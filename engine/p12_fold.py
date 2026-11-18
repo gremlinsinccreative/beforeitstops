@@ -38,7 +38,7 @@ BR = Brand2(1, ['Fold paper 42 times.', 'How thick?'], 'Fold paper 42 times. How
             [('A', 'Everest'), ('B', 'The Moon'), ('C', 'Mars')],
             [('Past the Moon', BLACK, 124, GOLD), ('0.1 mm, doubled 42 times', BOLD, 46, WHITE)],
             [('Real-world record:', BOLD, 48, WHITE), ('12 folds', BLACK, 100, GOLD)], T_STOP, T_TWIST, DUR,
-            sub='Guess A, B or C · wait for the Moon')
+            sub='Wait for the Moon')
 RESULT = {'A': 'out', 'B': 'win', 'C': 'out'}
 SX, MY, PX = 540, 1000, 340
 YY = np.linspace(0, 1, H)[:, None, None]
