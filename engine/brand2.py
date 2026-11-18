@@ -62,8 +62,9 @@ def glow(layer, radius=18, strength=1.0):
 
 class Brand2:
     def __init__(self, num, q_lines, q_short, chips, answer_lines, twist_lines, t_stop, t_twist, dur=10.5,
-                 sub='Guess before it stops.', cta=None, q_size=92):
+                 sub='Guess before it stops.', cta=None, q_size=92, next_line=None):
         self.num, self.chips, self.t_stop, self.t_twist, self.dur, self.cta = num, chips, t_stop, t_twist, dur, cta
+        self.next_line = next_line
         self.hook, _ = big_text([(f'FACT {num:03d}', SEMI, 30, MUTED)] + [(s, XB, q_size, WHITE) for s in q_lines]
                                 + [(sub, SEMI, 42, GOLD)], 260)
         self.q_short = q_short
@@ -105,6 +106,11 @@ class Brand2:
             if self.cta:
                 d.text((W / 2, y + 262), self.cta, font=font(BOLD, 40), fill=GOLD, anchor='mm')
             comp(img, lay, b)
+        if self.next_line and t >= self.dur - 1.9:       # light 'next up' teaser (A/B test), gone before the loop
+            k = ease_io(ramp(t, self.dur - 1.9, self.dur - 1.6)) * (1 - ease_io(ramp(t, self.dur - 0.75, self.dur - 0.5)))
+            if k > 0.02:
+                nl, _ = big_text([(self.next_line, BOLD, 38, (255, 214, 120))], 1050)
+                comp(img, nl, k)
         if self.t_stop <= t < self.t_stop + 0.45:          # soft flash, no zoom
             k = (1 - (t - self.t_stop) / 0.45) ** 2
             img.alpha_composite(Image.new('RGBA', (W, H), (255, 245, 225, int(120 * k))))
