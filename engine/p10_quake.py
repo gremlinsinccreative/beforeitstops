@@ -109,24 +109,19 @@ render_frame = looped(frame_core, DUR, xf=0.4)
 
 
 def music(mu):
-    mu.bed(0, T_STOP, cutoff=lambda tt: 0.03 + 0.12 * lvl(tt), vol=lambda tt: (0.03 + 0.12 * lvl(tt) ** 1.5) * clamp(tt / 0.05), seed=31)
-    mu.drone(0, T_STOP, lambda tt: 38 + 10 * lvl(tt), vol=0.05)
-    rate = lambda tt: 3.0 * 2 ** ((mag(tt) - 6) * 2.1)
-    mu.click_train(0, T_STOP - 0.3, rate, vol=0.24, tone=1500)
-    mu.click_train(3.5, T_STOP - 0.3, lambda tt: 2 * rate(tt), vol=0.06, tone=2400)
+    from brand import beat_track, stop_chord
+    mu.bed(0, T_STOP, cutoff=lambda tt: 0.03 + 0.08 * lvl(tt), vol=lambda tt: (0.02 + 0.07 * lvl(tt) ** 1.5) * clamp(tt / 0.05), seed=31)
+    beat_track(mu, T_STOP - 0.32, lvl, bpm0=92, bpm1=170, key=-5)
     for mm in (7, 8):
         lo, hi = 0.0, T_STOP
         for _ in range(30):
             md = (lo + hi) / 2
             lo, hi = (lo, md) if mag(md) >= mm else (md, hi)
-        mu.boom(hi, 0.45, 1.2)
-    for hb in (T_STOP - 1.5, T_STOP - 1.08, T_STOP - 0.72):
-        mu.thump(hb, 0.5)
+        mu.boom(hi, 0.3, 1.0)
     mu.silence(T_STOP - 0.32, T_STOP)
-    mu.stop_signature(T_STOP)
-    mu.boom(T_STOP + 0.02, 0.9, 2.0)
-    mu.bed(T_STOP + 0.4, DUR, cutoff=lambda tt: 0.02, vol=lambda tt: 0.012, seed=5)
-    mu.bell(T_TWIST, 659.25, 0.2, -0.3); mu.bell(T_TWIST + 0.1, 987.77, 0.2, 0.3)
+    stop_chord(mu, T_STOP, key=-5)
+    mu.bed(T_STOP + 0.4, DUR, cutoff=lambda tt: 0.02, vol=lambda tt: 0.01, seed=5)
+    mu.bell(T_TWIST, 659.25 * 2 ** (-5 / 12), 0.16, -0.3); mu.bell(T_TWIST + 0.1, 987.77 * 2 ** (-5 / 12), 0.16, 0.3)
 
 
 if __name__ == '__main__':

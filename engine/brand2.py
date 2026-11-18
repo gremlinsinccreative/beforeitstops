@@ -67,6 +67,7 @@ class Brand2:
         self.hook, _ = big_text([(f'FACT {num:03d}', SEMI, 30, MUTED)] + [(s, XB, q_size, WHITE) for s in q_lines]
                                 + [(sub, SEMI, 42, GOLD)], 260)
         self.q_short = q_short
+        self.run_head, _ = big_text([(f'FACT {num:03d}', BOLD, 30, (205, 210, 225)), (q_short, BOLD, 44, (240, 242, 250))], 112)
         self.answer, _ = big_text(answer_lines, 150)
         self.twist_lines = twist_lines
 
@@ -82,12 +83,14 @@ class Brand2:
                 comp(img, lay, 1 - a)
             if a > 0:
                 lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-                ImageDraw.Draw(lay).text((W / 2, 175), self.q_short, font=font(BOLD, 44), fill=(235, 238, 248), anchor='mm')
+                lay.alpha_composite(HEADER_SHADE)
+                lay.alpha_composite(self.run_head)
                 comp(img, lay, a * 0.9)
         else:
             k = ease_out(ramp(t, self.t_stop, self.t_stop + 0.35))
             lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
             lay.alpha_composite(HEADER_SHADE)
+            ImageDraw.Draw(lay).text((W / 2, 112), f'FACT {self.num:03d}', font=font(SEMI, 28), fill=MUTED, anchor='mm')
             lay.alpha_composite(self.answer)
             chip_row(ImageDraw.Draw(lay), self.chips, result, 420, 'small')
             comp(img, lay, k)

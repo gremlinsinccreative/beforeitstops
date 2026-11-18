@@ -297,3 +297,82 @@ def main(render_frame, dur, music_fn, argv):
             render_frame(float(ts)).convert('RGB').save(f'{out}_{float(ts):05.2f}.png')
     else:
         render(render_frame, dur, out, music_fn, os.path.dirname(out) or '.')
+
+
+# ---------------- v5 music: a beat that accelerates with the count ----------------
+_SCALE = [0, 2, 4, 7, 9]                        # major pentatonic
+_CHORDS = [(0, 4, 7), (7, 11, 14), (9, 12, 16), (5, 9, 12)]   # I  V  vi  IV (semitones from root)
+_PATTERN = [0, 2, 4, 2, 1, 3, 5, 3]
+
+
+def _hz(semi, root=261.63):
+    return root * 2 ** (semi / 12)
+
+
+def marimba(m, t, f, vol=0.25, pan=0.0):
+    x = SMusic._x(0.7)
+    w = (np.sin(2 * np.pi * f * x) * np.exp(-x * 7)
+         + 0.35 * np.sin(2 * np.pi * f * 3.93 * x) * np.exp(-x * 30)
+         + 0.12 * np.sin(2 * np.pi * f * 9.2 * x) * np.exp(-x * 60))
+    m.add(t, (vol * w * np.clip(x / 0.0015, 0, 1)).astype(np.float32), pan)
+
+
+def soft_kick(m, t, vol=0.35):
+    x = SMusic._x(0.3)
+    f = 48 + 70 * np.exp(-x * 30)
+    m.add(t, (vol * np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-x * 11)).astype(np.float32))
+
+
+def soft_hat(m, t, vol=0.04, pan=0.2):
+    x = SMusic._x(0.05)
+    rng = np.random.default_rng(int(t * 1000) % 9973)
+    n = rng.standard_normal(len(x))
+    n = n - np.convolve(n, np.ones(6) / 6, 'same')
+    m.add(t, (vol * n * np.exp(-x * 90)).astype(np.float32), pan)
+
+
+def bass(m, t, f, dur, vol=0.12):
+    x = SMusic._x(dur)
+    w = np.sin(2 * np.pi * f * x) + 0.25 * np.sin(4 * np.pi * f * x)
+    env = np.clip(x / 0.01, 0, 1) * np.exp(-x * 2.2)
+    m.add(t, (vol * w * env).astype(np.float32))
+
+
+def beat_track(m, t_end, prog, bpm0=96, bpm1=168, key=0):
+    """Accelerating, musical count-up: tempo and note density rise with prog(t) in 0..1; the melody climbs a
+    pentatonic scale on a 16th-note grid; chords I-V-vi-IV every bar. Stops at t_end (silence follows)."""
+    root = 261.63 * 2 ** (key / 12)
+    t, step = 0.0, 0
+    while t < t_end:
+        p = clamp(prog(t))
+        sixteenth = 60.0 / (bpm0 + (bpm1 - bpm0) * p) / 4
+        bar = step // 16
+        ch = _CHORDS[bar % 4]
+        if step % 16 == 0:
+            bass(m, t, root / 4 * 2 ** (ch[0] / 12), 16 * sixteenth, 0.13)
+        if step % 4 == 0:
+            soft_kick(m, t, 0.28 + 0.15 * p)
+        if step % 2 == 0:
+            soft_hat(m, t, 0.025 + 0.03 * p, pan=0.25 if step % 4 else -0.25)
+        dense = (step % 2 == 0) or p > 0.55
+        if dense:
+            lift = int(p * 9)
+            idx = lift + _PATTERN[(step // (1 if p > 0.55 else 2)) % 8]
+            o, k = divmod(idx, 5)
+            f = root * 2 ** ((12 * o + _SCALE[k]) / 12)
+            marimba(m, t, f, 0.16 + 0.06 * p, pan=0.3 * math.sin(step * 0.9))
+        t += sixteenth
+        step += 1
+
+
+def stop_chord(m, t, key=0):
+    root = 261.63 * 2 ** (key / 12)
+    soft_kick(m, t, 0.6)
+    m.boom(t, 0.7, 1.6)
+    for i, s in enumerate((0, 7, 12, 16, 19, 26)):
+        f = root / 2 * 2 ** (s / 12)
+        x = SMusic._x(3.2)
+        w = (np.sin(2 * np.pi * f * x) + 0.3 * np.sin(4 * np.pi * f * x)) * np.clip(x / 0.01, 0, 1) * np.exp(-x * 0.9)
+        m.add(t, (0.07 * w).astype(np.float32), pan=(i / 5) * 1.2 - 0.6)
+    for k, s in enumerate((24, 28, 31, 36)):
+        marimba(m, t + 0.06 * k, root / 2 * 2 ** (s / 12), 0.2, pan=(k - 1.5) * 0.3)

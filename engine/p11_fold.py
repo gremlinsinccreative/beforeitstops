@@ -95,7 +95,23 @@ def frame_core(t):
 
 
 render_frame = looped(frame_core, DUR, xf=0.4)
-music = S8.music
+
+
+def music(m):
+    from brand import beat_track, stop_chord
+    prog = lambda tt: (F.nfold(tt) - 3) / 39
+    lhs = lambda tt: (math.log10(F.alt(F.nfold(tt))) + 4) / 12.6
+    m.bed(0, T_STOP, cutoff=lambda tt: 0.9 - 0.85 * clamp(lhs(tt) * 1.15),
+          vol=lambda tt: 0.022 * (1 - 0.7 * clamp(lhs(tt) * 1.2)) * clamp(tt / 0.05), seed=3)
+    beat_track(m, T_STOP - 0.32, prog, bpm0=96, bpm1=172, key=0)
+    pans = {'Burj Khalifa': (-0.9, 0.2), 'Everest': (0.9, -0.2), 'Space Station': (0.8, -0.6), 'The Moon': (-0.3, 0.3)}
+    for name, pt in F.PASS.items():
+        if pt < T_STOP - 0.5:
+            m.whoosh(pt - 0.35, 0.8, 0.12, *pans[name])
+    m.silence(T_STOP - 0.32, T_STOP)
+    stop_chord(m, T_STOP, key=0)
+    m.bed(T_STOP + 0.4, DUR, cutoff=lambda tt: 0.02, vol=lambda tt: 0.01, seed=5)
+    m.bell(T_TWIST, 659.25, 0.16, -0.3); m.bell(T_TWIST + 0.1, 987.77, 0.16, 0.3)
 
 if __name__ == '__main__':
     main(render_frame, DUR, music, sys.argv)
