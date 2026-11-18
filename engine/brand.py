@@ -376,3 +376,71 @@ def stop_chord(m, t, key=0):
         m.add(t, (0.07 * w).astype(np.float32), pan=(i / 5) * 1.2 - 0.6)
     for k, s in enumerate((24, 28, 31, 36)):
         marimba(m, t + 0.06 * k, root / 2 * 2 ** (s / 12), 0.2, pan=(k - 1.5) * 0.3)
+
+
+# ---------------- v6 music: drums + satisfying tones, accelerating ----------------
+def snare(m, t, vol=0.22, pan=0.0):
+    x = SMusic._x(0.25)
+    rng = np.random.default_rng(int(t * 1009) % 9967)
+    n = rng.standard_normal(len(x))
+    n = n - np.convolve(n, np.ones(12) / 12, 'same')
+    w = 0.8 * n * np.exp(-x * 22) + 0.6 * np.sin(2 * np.pi * 190 * x) * np.exp(-x * 35)
+    m.add(t, (vol * w).astype(np.float32), pan)
+
+
+def punch_kick(m, t, vol=0.5):
+    x = SMusic._x(0.35)
+    f = 45 + 110 * np.exp(-x * 38)
+    click = np.exp(-x * 400) * 0.3
+    m.add(t, (vol * (np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-x * 9) + click)).astype(np.float32))
+
+
+def crash(m, t, vol=0.12):
+    x = SMusic._x(2.2)
+    rng = np.random.default_rng(77)
+    n = rng.standard_normal(len(x))
+    n = n - np.convolve(n, np.ones(4) / 4, 'same')
+    m.add_st(t, (vol * n * np.exp(-x * 2.2)).astype(np.float32), (vol * np.roll(n, 37) * np.exp(-x * 2.2)).astype(np.float32))
+
+
+def drum_track(m, t_end, prog, bpm0=100, bpm1=150, key=0, roll=1.6):
+    """Kick on every beat, snare on 2 and 4, hats on 8ths (16ths in the second half), a marimba arpeggio that
+    climbs with prog, bass on each bar, and a snare roll into the drop for the last `roll` seconds."""
+    root = 261.63 * 2 ** (key / 12)
+    t, step = 0.0, 0
+    while t < t_end:
+        p = clamp(prog(t))
+        sixteenth = 60.0 / (bpm0 + (bpm1 - bpm0) * p) / 4
+        in_roll = t > t_end - roll
+        bar = step // 16
+        ch = _CHORDS[bar % 4]
+        if step % 16 == 0:
+            bass(m, t, root / 4 * 2 ** (ch[0] / 12), 16 * sixteenth, 0.15)
+        if step % 4 == 0:
+            punch_kick(m, t, 0.42 + 0.12 * p)
+        if not in_roll and step % 8 == 4:
+            snare(m, t, 0.20 + 0.06 * p)
+        if in_roll:
+            k = (t - (t_end - roll)) / roll
+            if step % (2 if k < 0.5 else 1) == 0:
+                snare(m, t, 0.08 + 0.2 * k, pan=0.2 * math.sin(step))
+        if step % 2 == 0 or p > 0.5:
+            soft_hat(m, t, 0.035 + 0.03 * p, pan=0.3 if step % 4 else -0.3)
+        if step % 2 == 0:
+            idx = int(p * 8) + _PATTERN[(step // 2) % 8]
+            o, k5 = divmod(idx, 5)
+            marimba(m, t, root * 2 ** ((12 * o + _SCALE[k5]) / 12), 0.15 + 0.05 * p, pan=0.35 * math.sin(step * 0.7))
+        t += sixteenth
+        step += 1
+
+
+def ding(m, t, key=0, vol=0.16, pan=0.0):
+    root = 261.63 * 2 ** (key / 12)
+    for i, s in enumerate((24, 28, 31)):
+        m.bell(t + 0.02 * i, root * 2 ** (s / 12), vol, pan)
+
+
+def drop_hit(m, t, key=0):
+    punch_kick(m, t, 0.8)
+    crash(m, t, 0.12)
+    stop_chord(m, t, key)
