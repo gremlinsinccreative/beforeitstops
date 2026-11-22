@@ -20,6 +20,8 @@ Tracker artifact: 6e19458b-da7b-43b4-a59f-049e9f8c0d27 (dataset `datasets/videos
 - Twist card after the STOP. Optional "Comment your letter" under it.
 - Sound: drum_track (kick, snare on 2 and 4, hats, marimba arpeggio, bass) accelerating with progress; a ding at each milestone; snare roll; 0.32 s silence; drop_hit at the STOP. Darker key (key=-5) for disaster topics.
 - Bottom quarter of the frame stays clear of text (platform interface). Works muted.
+- Top: the "FACT NNN" label sits at y 220 (brand2.TOP; below Instagram Reels' top overlay), everything under it shifted by the same offset (Creative, 21 Nov; from fact 021).
+- Loudness: lib.mux sets about -14 LUFS integrated with a limiter, true peak at or below -1.5 dBTP after AAC (Creative, 21 Nov; fact 021: -14.7 LUFS, -3.0 dBTP; fact 020 was -17.7 LUFS).
 
 ## Fact rules
 - Counter-intuitive, checkable, one number; facts with stakes (danger, disasters, body, money, space) preferred over trivia.

@@ -158,9 +158,28 @@ class Audio:
         wavfile.write(path, SR, (st * 32767).astype(np.int16))
 
 
+def _loudness(path, af=''):
+    """Integrated loudness (LUFS) and true peak (dBTP) via ffmpeg loudnorm's measurement pass."""
+    import json
+    flt = (af + ',' if af else '') + 'loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json'
+    r = subprocess.run(['ffmpeg', '-hide_banner', '-nostats', '-i', path, '-af', flt, '-f', 'null', '-'],
+                       capture_output=True, text=True)
+    js = r.stderr[r.stderr.rindex('{'):r.stderr.rindex('}') + 1]
+    m = json.loads(js)
+    return float(m['input_i']), float(m['input_tp'])
+
+
 def mux(video, wav, out):
+    """Mux with loudness set to about -14 LUFS integrated, true peak <= -1.5 dBTP (Creative 21 Nov):
+    plain gain to the target, then a look-ahead limiter on the few peaks (the STOP drop stays the loudest moment)."""
     tmp = out[:-4] + '.part.mp4'
+    li, _ = _loudness(wav)
+    gain = -14.0 - li
+    af = f'volume={gain:.2f}dB,alimiter=limit=0.6:attack=2:release=60:level=false'
+    li2, _ = _loudness(wav, af)
+    af = f'volume={gain + (-14.0 - li2):.2f}dB,alimiter=limit=0.6:attack=2:release=60:level=false'
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', video, '-i', wav, '-map', '0:v', '-map', '1:a',
+                    '-af', af, '-ar', '48000',
                     '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', tmp],
                    check=True)
     os.replace(tmp, out)

@@ -11,6 +11,12 @@ from brand import SMusic, chip_row, looped, main, render as _r, HEADER_SHADE
 
 SS = 2
 HOOK_END = 1.2
+TOP = 220          # 'FACT NNN' label y: below Instagram Reels' top overlay (Creative, 21 Nov; was 112)
+DY = TOP - 112     # everything stacked under the label moves by the same offset
+_hs2 = np.zeros((H, W, 4), np.uint8)
+_hs2[:, :, 3] = (np.clip(1 - np.arange(H) / (470 + DY), 0, 1) ** 1.4 * 190).astype(np.uint8)[:, None]
+_hs2[:, :, :3] = (4, 5, 14)
+HEADER_SHADE2 = Image.fromarray(_hs2, 'RGBA')
 
 
 class Canvas:
@@ -68,8 +74,8 @@ class Brand2:
         self.hook, _ = big_text([(f'FACT {num:03d}', SEMI, 30, MUTED)] + [(s, XB, q_size, WHITE) for s in q_lines]
                                 + [(sub, SEMI, 42, GOLD)], 260)
         self.q_short = q_short
-        self.run_head, _ = big_text([(f'FACT {num:03d}', BOLD, 30, (205, 210, 225)), (q_short, BOLD, 44, (240, 242, 250))], 112)
-        self.answer, _ = big_text(answer_lines, 150)
+        self.run_head, _ = big_text([(f'FACT {num:03d}', BOLD, 30, (205, 210, 225)), (q_short, BOLD, 44, (240, 242, 250))], TOP)
+        self.answer, _ = big_text(answer_lines, 150 + DY)
         self.twist_lines = twist_lines
 
     def overlay(self, img, t, result):
@@ -78,22 +84,22 @@ class Brand2:
         if t < self.t_stop:
             if a < 1:
                 lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-                lay.alpha_composite(HEADER_SHADE)
+                lay.alpha_composite(HEADER_SHADE2)
                 lay.alpha_composite(self.hook)
                 chip_row(ImageDraw.Draw(lay), self.chips, {}, 660, 'big')
                 comp(img, lay, 1 - a)
             if a > 0:
                 lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-                lay.alpha_composite(HEADER_SHADE)
+                lay.alpha_composite(HEADER_SHADE2)
                 lay.alpha_composite(self.run_head)
                 comp(img, lay, a * 0.9)
         else:
             k = ease_out(ramp(t, self.t_stop, self.t_stop + 0.35))
             lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-            lay.alpha_composite(HEADER_SHADE)
-            ImageDraw.Draw(lay).text((W / 2, 112), f'FACT {self.num:03d}', font=font(SEMI, 28), fill=MUTED, anchor='mm')
+            lay.alpha_composite(HEADER_SHADE2)
+            ImageDraw.Draw(lay).text((W / 2, TOP), f'FACT {self.num:03d}', font=font(SEMI, 28), fill=MUTED, anchor='mm')
             lay.alpha_composite(self.answer)
-            chip_row(ImageDraw.Draw(lay), self.chips, result, 420, 'small')
+            chip_row(ImageDraw.Draw(lay), self.chips, result, 420 + DY, 'small')
             comp(img, lay, k)
         if t >= self.t_twist:
             b = ease_out(ramp(t, self.t_twist, self.t_twist + 0.4))
