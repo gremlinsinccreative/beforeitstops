@@ -39,6 +39,7 @@ Preview at least six frames (hook, each milestone label, just before the STOP, t
 - text: question, blank line, answer + source + 3-4 hashtags.
 - metadata: instagram {type: "reel", shouldShareToFeed: true, isAiGenerated: false}; tiktok {title: question, isAiGenerated: false}; youtube {title: question, categoryId: "27", madeForKids: false, privacy: "public", isAiGenerated: false}.
 - Code-rendered animation: never mark as AI-generated.
+- YouTube: Buffer refuses a 3rd YouTube post on the same day ("maximum number of posts YouTube allows in a day (2)", 24 Nov). Until HQ decides, the 3rd video of a day goes to TikTok + Instagram only and stays Ready for YouTube.
 - Buffer reports a limit of 10 scheduled posts (per channel or per organization: unverified). Schedule each morning only for the same day; keep at most 3 videos (9 posts) queued at once.
 
 ## Cadence
@@ -48,6 +49,9 @@ Preview at least six frames (hook, each milestone label, just before the STOP, t
 
 ## Next-up teaser A/B test (claude/next-up-research.md)
 Odd-numbered new videos get Brand2(next_line="Next: FACT NNN · <next question>") (shown 1.9-0.5 s before the end, gone before the loop); even-numbered ones don't. Mark "+teaser" in `how`. After 10 videos compare full-watch %, average watch time, profile views and follows.
+
+## Held facts
+- `engine/hold_zombie.py` (zombie outbreak doubling, Marketing 21 Nov): rendered 24 Nov but held, T&S rule: a deadly real Ebola outbreak (DR Congo) is in the news. Re-check the news before using it; ship by 30 Nov or drop.
 
 ## Open incidents
 - Fact 004 (seconds), 13 Nov: TikTok removed it ("community guidelines", none named); appeal pending. Leave its TikTok cell blank unless restored. Do not re-upload. If TikTok removes a second video, report it at the top and notify the owner; do not change the queue without the owner.
