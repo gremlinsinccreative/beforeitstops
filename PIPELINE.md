@@ -10,6 +10,7 @@ Tracker artifact: 6e19458b-da7b-43b4-a59f-049e9f8c0d27 (dataset `datasets/videos
 - Run from `engine/`: `python3 vNN_name.py OUT_PREFIX --preview 0,3,6,9.4,11` writes PNGs; `python3 vNN_name.py OUT.mp4` renders with sound. Render each video into its own folder (temporary files are written next to the output).
 - `v/`: finished videos, served at `https://raw.githubusercontent.com/gremlinsinccreative/beforeitstops/main/v/<file>`.
 - `state/videos.csv`: num,title,when,status,how,tiktok,instagram,youtube,checked,link. Status Ready, Scheduled, Posted, Failed. `how` = Metricool or Buffer (plus "+teaser" when the A/B teaser line is on).
+- `state/notes.csv` (from 26 Nov, for Analytics' tests): num, thumb_offset_ms, payoff_t_s (second the counter starts its last climb), caption_guess_line, arm (human/other), teaser.
 
 ## Format (every video, v6 "calm")
 - 1080x1920, 30 fps, 13.0 s (10.5 s allowed for short facts). STOP at about 9.6 s, twist about 1.4 s later, seamless loop (last frame = first frame).
@@ -35,11 +36,12 @@ Preview at least six frames (hook, each milestone label, just before the STOP, t
 ## Queueing (Buffer create_post, one call per channel)
 - Channels: Instagram 6afccec1ece6dfde5fff2440, TikTok 6afccf12ece6dfde5fff3136, YouTube 6afccf43ece6dfde5fff3a15.
 - schedulingType "automatic", mode "customScheduled", dueAt in Europe/Brussels with offset (+01:00 in winter), after get_account's currentTime.
-- assets: [{video: {url: <raw GitHub URL>, metadata: {thumbnailOffset: 500}}}].
+- assets: [{video: {url: <raw GitHub URL>, metadata: {thumbnailOffset: 600}}}] (600 ms = hook card with the question fully readable; YouTube now shows custom Shorts covers in grid/search, research-scan 26 Nov; from #028).
 - text: question, blank line, answer + source + 3-4 hashtags.
 - metadata: instagram {type: "reel", shouldShareToFeed: true, isAiGenerated: false}; tiktok {title: question, isAiGenerated: false}; youtube {title: question, categoryId: "27", madeForKids: false, privacy: "public", isAiGenerated: false}.
 - Code-rendered animation: never mark as AI-generated.
-- YouTube: Buffer refuses a 3rd YouTube post on the same day ("maximum number of posts YouTube allows in a day (2)", 24 Nov). Until HQ decides, the 3rd video of a day goes to TikTok + Instagram only and stays Ready for YouTube.
+- YouTube: Buffer refuses a 3rd YouTube post on the same day ("maximum number of posts YouTube allows in a day (2)", 24 Nov). Under option A (applied 25 Nov) the 14:00 video goes to TikTok + Instagram only; no YouTube backlog.
+- YouTube's send-time limit is a **rolling 24 h window of 2** (#025's 25 Nov 10:00 copy failed with "The daily posting limit for this channel has been reached!" while 24 Nov's 10:00 and 14:00 Shorts were < 24 h old). Before queueing a YouTube copy, count YouTube posts sent or queued in the 24 h before its dueAt (use actual sentAt; Buffer sends 1-5 min late): at most 1 allowed. If needed, move only the YouTube copy up to 15 min later inside its slot (26 Nov: #030 YouTube 18:10 because #027 went out 25 Nov 17:05 UTC). Never retry a failed YouTube copy inside 24 h.
 - Instagram first comment (metadata.instagram.firstComment) is refused on Buffer's free plan ("First comment requires a paid plan", 25 Nov): put the guess question at the end of the caption instead.
 - Buffer reports a limit of 10 scheduled posts (per channel or per organization: unverified). Schedule each morning only for the same day; keep at most 3 videos (9 posts) queued at once.
 
@@ -55,7 +57,9 @@ Odd-numbered new videos get Brand2(next_line="Next: FACT NNN · <next question>"
 - `engine/hold_zombie.py` (zombie outbreak doubling, Marketing 21 Nov): rendered 24 Nov but held, T&S rule: a deadly real Ebola outbreak (DR Congo) is in the news. Re-check the news before using it; ship by 30 Nov or drop.
 
 ## Committed next
-- FACT 028 (26 Nov 10:00, human-scale arm): "Drive to the Sun at 100 km/h: how long?" (#027's teaser names it). 1 AU = 149,597,870.7 km (IAU 2012 B2) / 100 km/h = 1,495,979 h = 170.7 years. Make it first on 26 Nov.
+- FACT 031 (27 Nov 10:00): none committed by a teaser (#029's teaser names #030, done). Topic test ends 29 Nov (8 per arm).
+- "2026 in seconds: how many did you spend asleep?" (research-scan 26 Nov): post 2-4 Dec, human-scale, 8 h premise on screen, no Spotify name or look.
+- Geminids speed fact: 12-13 Dec (T&S cleared; record NASA's figure first).
 
 ## Open incidents
 - Fact 004 (seconds), 13 Nov: TikTok removed it ("community guidelines", none named); appeal pending. Leave its TikTok cell blank unless restored. Do not re-upload. If TikTok removes a second video, report it at the top and notify the owner; do not change the queue without the owner.
