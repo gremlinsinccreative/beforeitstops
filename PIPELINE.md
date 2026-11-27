@@ -17,7 +17,7 @@ Tracker artifact: 6e19458b-da7b-43b4-a59f-049e9f8c0d27 (dataset `datasets/videos
 - Hook, 0-1.2 s: "FACT NNN", the question (6 words or fewer where possible), ONE gold promise line "Wait for <the payoff>", three answer chips A/B/C. The scene is already moving underneath. No "Guess A, B or C" line.
 - While it runs: only "FACT NNN" + the question as one small shadowed line at the top, ONE hero visual, ONE number. No chips, no fuse, no strike-throughs.
 - Motion: one smooth eased curve (PchipInterpolator through keyframes) that slows at each milestone so its label can be read for about 1 s. Labels sit on the side away from their object. No camera shake, no flicker, no stepping, no scrolling stripes. All shapes drawn with Canvas (2x) and glow only on the hero.
-- At the STOP: soft warm flash, answer at the top, the chips once, resolved (wrong struck, right in gold). Correct answer is not always the last chip. If a render measures above -1.5 dBTP after AAC, re-mux the audio once with `alimiter=limit=0.70` (fact 026: -0.94 -> -3.1 dBTP, -14.7 LUFS).
+- At the STOP: soft warm flash, answer at the top, the chips once, resolved (wrong struck, right in gold). Correct answer is not always the last chip. If a render measures above -1.5 dBTP after AAC, re-mux from the render folder's silent.mp4 + a.wav with lib.mux's filter and a lower limit (fact 026: limit 0.70, -0.94 -> -3.1 dBTP, -14.7 LUFS; fact 031: limit 0.5, +1.04 -> -4.5 dBTP, -15.0 LUFS). Always `level=false`: alimiter's default auto-level raised #031 to -11.6 LUFS / +1.8 dBTP on a first try.
 - Twist card after the STOP. Optional "Comment your letter" under it.
 - Sound: drum_track (kick, snare on 2 and 4, hats, marimba arpeggio, bass) accelerating with progress; a ding at each milestone; snare roll; 0.32 s silence; drop_hit at the STOP. Darker key (key=-5) for disaster topics.
 - Bottom quarter of the frame stays clear of text (platform interface). Works muted.
@@ -54,10 +54,10 @@ Preview at least six frames (hook, each milestone label, just before the STOP, t
 Odd-numbered new videos get Brand2(next_line="Next: FACT NNN · <next question>") (shown 1.9-0.5 s before the end, gone before the loop); even-numbered ones don't. Mark "+teaser" in `how`. After 10 videos compare full-watch %, average watch time, profile views and follows.
 
 ## Held facts
-- `engine/hold_zombie.py` (zombie outbreak doubling, Marketing 21 Nov): rendered 24 Nov but held, T&S rule: a deadly real Ebola outbreak (DR Congo) is in the news. Re-check the news before using it; ship by 30 Nov or drop.
+- `engine/hold_zombie.py` (zombie outbreak doubling, Marketing 21 Nov): DROPPED 27 Nov. #031 (lily pads) is a doubling fact, so a second doubling video before 30 Nov would look templated (T&S 24 Nov item 3), and the trend is past its day 4-10 peak (from 16 Nov).
 
 ## Committed next
-- FACT 031 (27 Nov 10:00): none committed by a teaser (#029's teaser names #030, done). Topic test ends 29 Nov (8 per arm).
+- FACT 034 (28 Nov 10:00): committed by #033's teaser: "Count your cells, 1 a second: how long?" Human arm. 3.0×10^13 human cells in a 70 kg reference man (Sender, Fuchs & Milo, PLoS Biol 2016; BioNumbers 113006) ÷ 31,557,600 s per year ≈ 950,600 years (recompute in the script). Topic test ends 29 Nov (8 per arm).
 - "2026 in seconds: how many did you spend asleep?" (research-scan 26 Nov): post 2-4 Dec, human-scale, 8 h premise on screen, no Spotify name or look.
 - Geminids speed fact: 12-13 Dec (T&S cleared; record NASA's figure first).
 
