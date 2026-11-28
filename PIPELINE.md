@@ -10,7 +10,7 @@ Tracker artifact: 6e19458b-da7b-43b4-a59f-049e9f8c0d27 (dataset `datasets/videos
 - Run from `engine/`: `python3 vNN_name.py OUT_PREFIX --preview 0,3,6,9.4,11` writes PNGs; `python3 vNN_name.py OUT.mp4` renders with sound. Render each video into its own folder (temporary files are written next to the output).
 - `v/`: finished videos, served at `https://raw.githubusercontent.com/gremlinsinccreative/beforeitstops/main/v/<file>`.
 - `state/videos.csv`: num,title,when,status,how,tiktok,instagram,youtube,checked,link. Status Ready, Scheduled, Posted, Failed. `how` = Metricool or Buffer (plus "+teaser" when the A/B teaser line is on).
-- `state/notes.csv` (from 26 Nov, for Analytics' tests): num, thumb_offset_ms, payoff_t_s (second the counter starts its last climb), caption_guess_line, arm (human/other), teaser.
+- `state/notes.csv` (from 26 Nov, for Analytics' tests): num, thumb_offset_ms, payoff_t_s (second the counter starts its last climb), caption_guess_line, arm (human/other), teaser, dead_beat_s and events_per_10s (from 28 Nov: `python3 engine/pace_check.py v/factNNN.mp4 <payoff_s>`, Creative 27 Nov; log only, gate 2.0 s in claude/creative/render-rules.md §8; also fix a 'first visual change' CHECK above 0.5 s before queueing, as on #035).
 
 ## Format (every video, v6 "calm")
 - 1080x1920, 30 fps, 13.0 s (10.5 s allowed for short facts). STOP at about 9.6 s, twist about 1.4 s later, seamless loop (last frame = first frame).
@@ -41,7 +41,7 @@ Preview at least six frames (hook, each milestone label, just before the STOP, t
 - metadata: instagram {type: "reel", shouldShareToFeed: true, isAiGenerated: false}; tiktok {title: question, isAiGenerated: false}; youtube {title: question, categoryId: "27", madeForKids: false, privacy: "public", isAiGenerated: false}.
 - Code-rendered animation: never mark as AI-generated.
 - YouTube: Buffer refuses a 3rd YouTube post on the same day ("maximum number of posts YouTube allows in a day (2)", 24 Nov). Under option A (applied 25 Nov) the 14:00 video goes to TikTok + Instagram only; no YouTube backlog.
-- YouTube's send-time limit is a **rolling 24 h window of 2** (#025's 25 Nov 10:00 copy failed with "The daily posting limit for this channel has been reached!" while 24 Nov's 10:00 and 14:00 Shorts were < 24 h old). Before queueing a YouTube copy, count YouTube posts sent or queued in the 24 h before its dueAt (use actual sentAt; Buffer sends 1-5 min late): at most 1 allowed. If needed, move only the YouTube copy up to 15 min later inside its slot (26 Nov: #030 YouTube 18:10 because #027 went out 25 Nov 17:05 UTC). Never retry a failed YouTube copy inside 24 h.
+- YouTube's send-time limit is a **rolling 24 h window of 2** (#025's 25 Nov 10:00 copy failed with "The daily posting limit for this channel has been reached!" while 24 Nov's 10:00 and 14:00 Shorts were < 24 h old). Before queueing a YouTube copy, count YouTube posts sent or queued in the 24 h before its dueAt (use actual sentAt; Buffer sends 1-5 min late): at most 1 allowed. If needed, move only the YouTube copy up to 20 min later inside its slot (26 Nov: #030 YouTube 18:10 because #027 went out 25 Nov 17:05 UTC; 28 Nov: #036 YouTube 18:20 because #033 went out 27 Nov 17:15:32 UTC, so 18:15 would still have been inside the window). Never retry a failed YouTube copy inside 24 h.
 - Instagram first comment (metadata.instagram.firstComment) is refused on Buffer's free plan ("First comment requires a paid plan", 25 Nov): put the guess question at the end of the caption instead.
 - Buffer reports a limit of 10 scheduled posts (per channel or per organization: unverified). Schedule each morning only for the same day; keep at most 3 videos (9 posts) queued at once.
 
@@ -57,7 +57,7 @@ Odd-numbered new videos get Brand2(next_line="Next: FACT NNN · <next question>"
 - `engine/hold_zombie.py` (zombie outbreak doubling, Marketing 21 Nov): DROPPED 27 Nov. #031 (lily pads) is a doubling fact, so a second doubling video before 30 Nov would look templated (T&S 24 Nov item 3), and the trend is past its day 4-10 peak (from 16 Nov).
 
 ## Committed next
-- FACT 034 (28 Nov 10:00): committed by #033's teaser: "Count your cells, 1 a second: how long?" Human arm. 3.0×10^13 human cells in a 70 kg reference man (Sender, Fuchs & Milo, PLoS Biol 2016; BioNumbers 113006) ÷ 31,557,600 s per year ≈ 950,600 years (recompute in the script). Topic test ends 29 Nov (8 per arm).
+- FACT 034 posted 28 Nov 10:00 as committed (cells, 950,643 years).
 - "2026 in seconds: how many did you spend asleep?" (research-scan 26 Nov): post 2-4 Dec, human-scale, 8 h premise on screen, no Spotify name or look.
 - Geminids speed fact: 12-13 Dec (T&S cleared; record NASA's figure first).
 
